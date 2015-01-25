@@ -2,7 +2,7 @@
 #define _SearchPattern_h_
 
 #include <string>
-#include <boost/move/move.hpp>
+//#include <boost/move/move.hpp>
 
 namespace uim{
 
@@ -38,7 +38,7 @@ public:
         unsigned int pos = str_search(in,pat1);
         if(pos == 0) return "0";
         std::string tmp_str( in, pos, pat1.size() );
-		return boost::move(tmp_str);
+		return std::move(tmp_str);
 
 	}
 
@@ -49,7 +49,7 @@ public:
 		unsigned int pos2 = str_search(in,pat2);
         if(pos2 == 0) return "0";
 		std::string tmp_str(in, pos1 + pat1.size(), pos2 - (pos1 + pat1.size()) );
-		return boost::move(tmp_str);
+		return std::move(tmp_str);
 
 	}
 

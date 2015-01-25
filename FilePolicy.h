@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 
-namespace uim{
+namespace nxm{
 
 class FileUncompress{
 private:
@@ -18,15 +18,14 @@ private:
 protected:
 
     const int bufsize;
-	std::fstream fRead;
-	std::fstream fWrite;
+	std::fstream fFile;
 
 	  ~FileUncompress() { } //the destructor is protected, only derived classes can destroy policy object
 
 	  void openRead(const std::string &filename,std::ios_base::openmode m_mode = std::ios_base::in){
          try{
-	        fRead.open(filename.c_str(), m_mode); //Create file.
-            if(!fRead.is_open()) throw std::string("cannot open file");
+	        fFile.open(filename.c_str(), m_mode); //Create file.
+            if(!fFile.is_open()) throw std::string("cannot open file");
 	     }catch(...){
 			throw std::string("cannot create file");
 	     }
@@ -34,8 +33,8 @@ protected:
 
 	  void openWrite(const std::string &filename,std::ios_base::openmode m_mode = std::ios_base::ate|std::ios_base::out){
         try{
-	      fWrite.open(filename.c_str(), m_mode); //Create file.
-          if(!fWrite.is_open()) throw std::string("cannot open file");
+	      fFile.open(filename.c_str(), m_mode); //Create file.
+          if(!fFile.is_open()) throw std::string("cannot open file");
 		}catch(...){
 			throw std::string("cannot create file");
 		}
@@ -44,26 +43,25 @@ protected:
 	  bool readLine(std::string &buf){
 		  try{
 			char buffer[bufsize];
-		    fRead.getline(buffer, bufsize);
+		    fFile.getline(buffer, bufsize);
 		    buf = std::string(buffer);
 		  }catch(...){
 			return false;
 		  }
-		  return fRead.eof();
+		  return fFile.eof();
 	  }
 
-	  inline void writeEndl() { fWrite << std::endl; }
+	  inline void writeEndl() { fFile << std::endl; }
 
 	  void writeLine(const std::string &buf) {
          try{
-            fWrite << buf;
+            fFile << buf;
 		 }catch(...){
 			 throw std::string("cannot write to the file");
 		 }
 	  }
 
-	  inline void closeRead(){ if(fRead.is_open()) fRead.close(); }
-	  inline void closeWrite(){ if(fWrite.is_open()) fWrite.close(); }
+	  inline void closeFile(){ if(fFile.is_open()) fFile.close(); }
 
 public:
 
@@ -74,7 +72,6 @@ public:
 
 };
 
-}; //end of uim namespace
+}; //end of nxm namespace
 
 #endif
-
