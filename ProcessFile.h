@@ -35,9 +35,14 @@ public:
 	void Split(const char* val, splitVec &tokenList, const char *delim = "\341\232\226", int reserve_size = 90){
 		split(val, tokenList, delim, reserve_size);
 	}
+	
 	void Split(bool flagCSV, const char* val, splitVec &tokenList, const char *delim = "\u002C", const char *enclosure = "\u0022", int reserve_size = 90){
 		split(flagCSV, val, tokenList, delim, enclosure, reserve_size);
 	}
+        
+    void Split(const char* val, splitMap &tokenList, const char *delim = ",", const char *link ="=>", const char *ignore = "\"" ){
+        split(val,tokenList,delim,link,ignore);
+    }
 };
 
 }; //end of nxm namespace

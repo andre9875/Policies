@@ -5,10 +5,12 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <map>
 #include <exception>
 #include <utility>
 
 typedef std::vector<std::string> splitVec;
+typedef std::map<std::string,std::string> splitMap;
 
 namespace nxm{
 
@@ -16,6 +18,67 @@ class SplitPolicy {
 private:
 	//SplitPolicy(const SplitPolicy&);
 	//SplitPolicy& operator=(const SplitPolicy&);
+
+	bool isDelim(const char* val, const char *delim, int lenDelim, int pos){
+		for(int d=0; d<lenDelim; ++d){
+			if(val[pos + d] != delim[d]){  	//compare ignore character with substring
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void trim(std::string &val, const char *delim, int lenDelim){
+
+		int start=0;
+		int end = val.size();
+
+		const char *buffer = val.c_str();
+
+		for (int i = 0; buffer[i]; ++i){
+			if( isDelim(buffer,delim,lenDelim,i) )
+				start=i+lenDelim;
+			else
+				break;
+		}
+
+
+		for(int i=strlen(buffer)-1; i >= 0; --i){
+			if( isDelim(buffer,delim,lenDelim,i) )
+				end=i-lenDelim;
+			else
+				break;
+
+		}
+
+		if(start > 0){
+			std::string tmp_val(buffer + start, buffer + end+1);
+			val = tmp_val;
+		}
+	}
+
+	bool scanDelimiterLink(const char* val, const char *delim, const char *link, const char *ignore, int lenDelim, int lenLink, int lenIgnore, int &pos, int &posLink){
+				
+
+		for(int d=0; d<lenDelim; ++d){
+			std::cout << val[pos + d] << "==" << delim[d] << std::endl;
+			if(val[pos + d] == delim[d]){  	//compare ignore character with substring
+				return true;
+			}
+		}
+
+		for(int d=0; d<lenLink; ++d){
+			if(val[pos + d] == link[d]){  	//compare ignore character with substring
+				posLink=pos;
+				return false;
+			}
+		}				
+		++pos; //increment pointer along characters array	
+
+		return false;
+			
+	}
 
 	bool scanDelimiter(const char* val, const char *delim, int lenDelim, int pos, short &emptyToken){
 
@@ -41,6 +104,61 @@ private:
 	}
 
 protected:
+    
+    //split to map
+	void split(const char* val, splitMap &tokenList, const char *delim = ",", const char *link ="=>", const char *ignore = "\"" ){
+
+			try{
+					tokenList.clear();
+					int i;
+					bool newLine = false;
+					if (val[strlen(val) - 1] == '\n') //test for the \n
+							newLine = true;
+
+					int lenDelim = strlen(delim);	//get length of delimiter
+					int lenLink = strlen(link);		//get length of link
+					int lenIgnore = strlen(ignore); //get length of ignore
+					int start = 0; //-1 * lenDelim;		//handle first char in case if it's delimiter
+					std::string key;
+
+					for (i = 0; val[i]; ++i){
+
+						if( isDelim(val,link,lenLink,i) ){
+							std::string tmp_val(val + start, val + i);
+							trim(tmp_val,ignore,lenIgnore);
+							key=tmp_val;
+							tokenList.insert( std::pair<std::string,std::string>(tmp_val,"0") );
+							i+=lenLink;
+							start=i;
+						}
+
+						if( isDelim(val,delim,lenDelim,i) ){
+							std::string tmp_val(val + start, val + i);
+							trim(tmp_val,ignore,lenIgnore);
+							tokenList.find(key)->second = tmp_val;
+							i+=lenLink;
+							start=i;
+						}
+
+					}
+
+					//--- add last token to the vector ---
+
+					if (newLine == false){
+							std::string tmp_val(val + start, val + i);
+							trim(tmp_val,ignore,lenIgnore);
+							tokenList.find(key)->second = tmp_val;
+					}else{
+							std::string tmp_val(val + start, val + (i - 1));
+							trim(tmp_val,ignore,lenIgnore);
+							tokenList.find(key)->second = tmp_val;
+					}
+
+			}
+			catch (...){
+					tokenList.clear();
+			}
+	}
 
 	void split(const char* val, splitVec &tokenList, const char *delim = "\341\232\226", int reserve_size = 90 ){
 
